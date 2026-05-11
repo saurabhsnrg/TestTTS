@@ -12,16 +12,40 @@ class KokoroService:
         self.pipeline = None
         self.lang = lang
 
+    def ensure_model_cache(self, force=False):
+        """Ensure model cache exists locally. If not, download into ./model_cache."""
+        bundled_cache = os.path.abspath(os.path.join(os.path.dirname(__file__), 'model_cache'))
+        if os.path.isdir(bundled_cache) and not force:
+            os.environ.setdefault('HF_HOME', bundled_cache)
+            os.environ.setdefault('TRANSFORMERS_CACHE', bundled_cache)
+            os.environ.setdefault('HF_DATASETS_CACHE', bundled_cache)
+            return bundled_cache
+
+        # check common env vars for an existing cache
+        for env in ('HF_HOME', 'TRANSFORMERS_CACHE', 'HF_DATASETS_CACHE'):
+            p = os.environ.get(env)
+            if p and os.path.isdir(p):
+                return p
+
+        # download to bundled_cache
+        try:
+            from huggingface_hub import snapshot_download
+            log.info('Downloading Kokoro model to %s', bundled_cache)
+            snapshot_download(repo_id='hexgrad/Kokoro-82M', cache_dir=bundled_cache)
+            os.environ.setdefault('HF_HOME', bundled_cache)
+            os.environ.setdefault('TRANSFORMERS_CACHE', bundled_cache)
+            os.environ.setdefault('HF_DATASETS_CACHE', bundled_cache)
+            return bundled_cache
+        except Exception:
+            log.exception('Failed to download model')
+            raise
+
     def _ensure(self, lang=None):
         if lang is None:
             lang = self.lang
         if self.pipeline is None:
-            # If a bundled model_cache exists, prefer it by setting HF environment caches
-            bundled_cache = os.path.abspath(os.path.join(os.path.dirname(__file__), 'model_cache'))
-            if os.path.isdir(bundled_cache):
-                os.environ.setdefault('HF_HOME', bundled_cache)
-                os.environ.setdefault('TRANSFORMERS_CACHE', bundled_cache)
-                os.environ.setdefault('HF_DATASETS_CACHE', bundled_cache)
+            # ensure model cache exists (may download if missing)
+            self.ensure_model_cache()
             # device is CPU by default for this packaging
             self.pipeline = KPipeline(lang_code=lang)
 

@@ -30,4 +30,13 @@ def synth(req: SynthesizeRequest):
 
 if __name__ == '__main__':
     import uvicorn
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--download-model', action='store_true', help='Download Kokoro model to local cache and exit')
+    args = parser.parse_args()
+    if args.download_model:
+        print('Downloading Kokoro model to ./model_cache (this may take a while)')
+        svc.ensure_model_cache()
+        print('Model download complete')
+        raise SystemExit(0)
     uvicorn.run(app, host='127.0.0.1', port=8000)

@@ -31,9 +31,9 @@ jobs:
           python -m venv .venv
           .\.venv\Scripts\pip.exe install --upgrade pip
           .\.venv\Scripts\pip.exe install -r requirements.txt
-          .\.venv\Scripts\pip.exe install pyinstaller huggingface-hub
+          .\.venv\Scripts\pip.exe install pyinstaller
 
-      - name: Build backend exe (pre-download Kokoro model)
+      - name: Build backend exe (no pre-download)
         shell: pwsh
         run: |
           Write-Host "Running build-backend-exe.ps1"

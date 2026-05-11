@@ -1,4 +1,4 @@
-# Build backend executable with PyInstaller and pre-download Kokoro model
+# Build backend executable with PyInstaller (no pre-download of model)
 Set-StrictMode -Version Latest
 
 # Create venv if missing
@@ -8,20 +8,11 @@ if (-not (Test-Path ".venv")) {
 
 .\.venv\Scripts\pip.exe install --upgrade pip
 .\.venv\Scripts\pip.exe install -r requirements.txt
-.\.venv\Scripts\pip.exe install pyinstaller huggingface-hub
+.\.venv\Scripts\pip.exe install pyinstaller
 
-# Pre-download Kokoro model into backend/model_cache
-Write-Host "Downloading Kokoro model to backend\\model_cache (this may be large)"
-.\.venv\Scripts\python.exe - <<"PY"
-from huggingface_hub import snapshot_download
-print('Starting snapshot_download...')
-snapshot_download(repo_id='hexgrad/Kokoro-82M', cache_dir='backend\\model_cache')
-print('Download done')
-PY
-
-# Build with PyInstaller, include model_cache and audio folder
+# Build with PyInstaller; do NOT include a pre-downloaded model cache
 Write-Host "Running PyInstaller (this may take a while)"
-.\.venv\Scripts\pyinstaller --noconfirm --onefile --add-data "backend\\model_cache;model_cache" --add-data "audio;audio" --name TestTTS-backend backend_app.py
+.\.venv\Scripts\pyinstaller --noconfirm --onefile --add-data "audio;audio" --name TestTTS-backend backend_app.py
 
 # Move built exe to build directory for electron packaging
 if (Test-Path "dist\\TestTTS-backend.exe") {
