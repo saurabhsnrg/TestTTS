@@ -12,6 +12,9 @@ if (-not (Test-Path ".venv")) {
 
 # Build with PyInstaller; do NOT include a pre-downloaded model cache
 Write-Host "Running PyInstaller (this may take a while)"
+if (-not (Test-Path "audio")) { New-Item -ItemType Directory -Path "audio" -Force | Out-Null }
+
+# Build with PyInstaller (this may take a while)
 .\.venv\Scripts\pyinstaller --noconfirm --onefile --add-data "audio;audio" --name TestTTS-backend backend_app.py
 
 # Move built exe to build directory for electron packaging
