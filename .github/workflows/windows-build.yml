@@ -29,15 +29,28 @@ jobs:
         shell: pwsh
         run: |
           python -m venv .venv
-          .\.venv\Scripts\pip.exe install --upgrade pip
+          .\.venv\Scripts\python.exe -m pip install --upgrade pip setuptools wheel
           .\.venv\Scripts\pip.exe install -r requirements.txt
-          .\.venv\Scripts\pip.exe install pyinstaller
+          .\.venv\Scripts\pip.exe install pyinstaller huggingface-hub
 
       - name: Build backend exe (no pre-download)
         shell: pwsh
         run: |
           Write-Host "Running build-backend-exe.ps1"
           .\build-backend-exe.ps1
+
+      - name: Run backend exe to download Kokoro model (populate model_cache)
+        shell: pwsh
+        run: |
+          Write-Host "Running backend to download Kokoro model"
+          $exe = Join-Path -Path (Resolve-Path .\build\backend).Path -ChildPath "TestTTS-backend.exe"
+          if (Test-Path $exe) {
+            Start-Process -FilePath $exe -ArgumentList "--download-model" -NoNewWindow -Wait
+            Write-Host "Model download step finished"
+          } else {
+            Write-Host "Backend exe not found at $exe"
+            Exit 1
+          }
 
       - name: Build Electron installer
         shell: pwsh
@@ -58,3 +71,4 @@ jobs:
           path: |
             dist\**\*.exe
             build\backend\**\*
+            build\backend\model_cache\**\*
