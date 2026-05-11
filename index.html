@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TestTTS</title>
+  <style>body{font-family:Segoe UI,Arial;margin:20px}textarea{width:100%;height:220px}select,input,button{margin-top:8px}</style>
+</head>
+<body>
+  <h1>TestTTS</h1>
+  <div>
+    <label for="voice">Voice:</label>
+    <select id="voice"></select>
+  </div>
+  <div>
+    <textarea id="text" placeholder="Enter text to synthesize..."></textarea>
+  </div>
+  <div>
+    <button id="synth">Synthesize</button>
+    <button id="stop">Stop</button>
+    <a id="download" href="#" download style="margin-left:8px">Download</a>
+  </div>
+  <audio id="player" controls style="margin-top:12px; width:100%"></audio>
+  <script src="renderer.js"></script>
+</body>
+</html>

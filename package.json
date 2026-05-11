@@ -1,0 +1,38 @@
+{
+  "name": "testtts",
+  "version": "0.1.0",
+  "description": "TestTTS - local Kokoro-82M desktop TTS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "pack": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^26.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.example.testtts",
+    "productName": "TestTTS",
+    "files": ["**/*"],
+    "extraResources": [
+      {
+        "from": "build\\backend",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true
+    }
+  },
+  "author": "",
+  "license": "Apache-2.0"
+}

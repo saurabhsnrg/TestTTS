@@ -1,0 +1,60 @@
+name: Build TestTTS (Windows)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Python requirements and PyInstaller
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\pip.exe install --upgrade pip
+          .\.venv\Scripts\pip.exe install -r requirements.txt
+          .\.venv\Scripts\pip.exe install pyinstaller huggingface-hub
+
+      - name: Build backend exe (pre-download Kokoro model)
+        shell: pwsh
+        run: |
+          Write-Host "Running build-backend-exe.ps1"
+          .\build-backend-exe.ps1
+
+      - name: Build Electron installer
+        shell: pwsh
+        run: |
+          Write-Host "Running build-electron-installer.ps1"
+          .\build-electron-installer.ps1
+
+      - name: List outputs
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse -Force dist | Select-Object FullName, Length
+          Get-ChildItem -Recurse -Force build | Select-Object FullName, Length
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestTTS-windows-build
+          path: |
+            dist\**\*.exe
+            build\backend\**\*
